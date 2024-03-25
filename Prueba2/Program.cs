@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 class Excursionista
 {
@@ -19,11 +21,21 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Solicitar al usuario el número de elementos
+        int minCalorias = 15;
+        int maxPeso = 10;
+
+        // Verificar si las condiciones mínimas son válidas
+        if (minCalorias <= 0 || maxPeso <= 0)
+        {
+            Console.WriteLine("Las condiciones mínimas de calorías y peso deben ser mayores que cero.");
+            return;
+        }
+
+        Console.WriteLine($"Las condiciones mínimas son: {minCalorias} calorías y {maxPeso} de peso.");
+
         Console.WriteLine("Ingrese el número de elementos:");
         int numElementos = int.Parse(Console.ReadLine());
 
-        // Definir los elementos disponibles
         Dictionary<string, Excursionista> elementos = new Dictionary<string, Excursionista>();
         for (int i = 1; i <= numElementos; i++)
         {
@@ -34,14 +46,23 @@ class Program
             int peso = int.Parse(Console.ReadLine());
             Console.Write("Calorías: ");
             int calorias = int.Parse(Console.ReadLine());
-            elementos.Add(nombre, new Excursionista(nombre, peso, calorias));
-        }
 
-        // Parámetros de usuario
-        Console.WriteLine("Ingrese el mínimo de calorías:");
-        int minCalorias = int.Parse(Console.ReadLine());
-        Console.WriteLine("Ingrese el peso máximo:");
-        int maxPeso = int.Parse(Console.ReadLine());
+            // Verificar si las calorías son válidas
+            if (calorias < minCalorias)
+            {
+                throw new ArgumentException("El valor de calorías ingresado es inferior al mínimo requerido.");
+            }
+
+            elementos.Add(nombre, new Excursionista(nombre, peso, calorias));
+
+            if (peso > maxPeso)
+            {
+                throw new ArgumentException("El valor de Peso ingresado es superior al requerido.");
+            }
+
+            elementos.Add(nombre, new Excursionista(nombre, peso, calorias));
+
+        }
 
         // Encontrar conjunto óptimo de elementos
         List<Excursionista> conjuntoOptimo = EncontrarConjuntoOptimo(elementos, minCalorias, maxPeso);
@@ -57,7 +78,7 @@ class Program
     static List<Excursionista> EncontrarConjuntoOptimo(Dictionary<string, Excursionista> elementos, int minCalorias, int maxPeso)
     {
         List<Excursionista> conjuntoOptimo = new List<Excursionista>();
-        // Crear una matriz para almacenar los resultados de la programación dinámica
+
         int[,] matriz = new int[elementos.Count + 1, maxPeso + 1];
 
         for (int i = 1; i <= elementos.Count; i++)
@@ -76,7 +97,6 @@ class Program
             }
         }
 
-        // Reconstruir la solución
         int pesoActual = maxPeso;
         for (int i = elementos.Count; i > 0; i--)
         {
